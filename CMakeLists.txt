@@ -1,0 +1,9 @@
+cmake_minimum_required(VERSION 3.14)
+project(cache_simulator)
+
+set(CMAKE_CXX_STANDARD 17)
+
+target_include_directories(${PROJECT_NAME}
+  PRIVATE ${CMAKE_CURRENT_LIST_DIR}/include
+)
+
