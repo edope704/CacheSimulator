@@ -54,7 +54,7 @@ class CacheSet {
 
 class Cache {
   public:
-    Cache(MainMemory* main_mem);
+    void initialize(MainMemory* memory);
     uint32_t read(uint32_t address);
     void write(uint32_t address, uint32_t data);
 

@@ -6,10 +6,6 @@ CacheSet::CacheSet() {
   replacement_.SetWays(SET_ASSOCIATIVE_CACHE_N_WAYS);
 }
 
-CacheSet::~CacheSet() {
-
-}
-
 CacheLine* CacheSet::find(uint32_t tag) {
   for (uint8_t way{ 0 }; way<SET_ASSOCIATIVE_CACHE_N_WAYS; way++)
     if (set_.at(way).valid_ &&  set_.at(way).tag_ == tag) return &set_.at(way);
@@ -27,8 +23,8 @@ CacheLine* CacheSet::replace(uint32_t tag, uint8_t* new_data) {
   return nullptr;
 }
 
-Cache::Cache(MainMemory* main_mem) {
-  main_mem_ = main_mem;
+void Cache::initialize(MainMemory* memory) {
+  main_mem_ = memory;
 }
 
 uint32_t Cache::read(uint32_t address) {
