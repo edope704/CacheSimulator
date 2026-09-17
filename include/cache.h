@@ -15,7 +15,7 @@ constexpr uint8_t SET_ASSOCIATIVE_CACHE_N_WAYS = 4;
 constexpr uint8_t SET_ASSOCIATIVE_CACHE_TAG_SIZE = 20;
 constexpr uint8_t SET_ASSOCIATIVE_CACHE_INDEX_SIZE = 6;
 constexpr uint8_t SET_ASSOCIATIVE_CACHE_OFFEST_SIZE = 6; // 64 byte cache line
-                                                         //
+
 constexpr uint8_t DIRECTLY_MAPPED_CACHE_TAG_SIZE = 14;
 constexpr uint8_t DIRECTLY_MAPPED_CACHE_INDEX_SIZE = 12; // 4096 lines 
 constexpr uint8_t DIRECTLY_MAPPED_CACHE_OFFEST_SIZE = 6; // 64 byte cache line

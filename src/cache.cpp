@@ -1,6 +1,7 @@
-#include "../include/cache.h"
+#include "cache.h"
 #include <array>
 #include <cstring>
+#include "iostream"
 
 CacheSet::CacheSet() {
   replacement_.SetWays(SET_ASSOCIATIVE_CACHE_N_WAYS);
@@ -20,7 +21,7 @@ CacheLine* CacheSet::replace(uint32_t tag, uint8_t* new_data) {
 
   std::memcpy(set_.at(victim_index).data_.data(), new_data, CACHE_LINE_SIZE);
 
-  return nullptr;
+  return &set_.at(victim_index);
 }
 
 void Cache::initialize(MainMemory* memory) {
@@ -30,26 +31,32 @@ void Cache::initialize(MainMemory* memory) {
 uint32_t Cache::read(uint32_t address) {
   AddressParts address_parts{ address };
   
-  CacheSet target_set = sets_.at(address_parts.index_);
+  CacheSet& target_set = sets_.at(address_parts.index_);
   CacheLine* target_line = target_set.find(address_parts.tag_);
+
+  uint32_t data;
   
   if (target_line) { // cache hit
-    return *reinterpret_cast<uint32_t*>(target_line->data_[address_parts.offset_]);
+    std::printf( "Cache hit. Retrieving data from Cache...\n" );
+    data = *reinterpret_cast<uint32_t*>(&target_line->data_[address_parts.offset_]);
   } else { // cache miss
+    std::printf( "Cache miss, retrieving data from main memory...\n" );
     uint32_t target_line_start = address & ~(CACHE_LINE_SIZE - 1);
     std::array<uint8_t, CACHE_LINE_SIZE> temp_buffer;
     main_mem_->read(target_line_start, CACHE_LINE_SIZE, temp_buffer.data());
     CacheLine* new_line = target_set.replace(address_parts.tag_, temp_buffer.data());
-    return *reinterpret_cast<uint32_t*>(&new_line->data_[address_parts.offset_]);
+
+    data = *reinterpret_cast<uint32_t*>(&new_line->data_[address_parts.offset_]);
   }
-  
-  return 0;
+
+  std::printf( "Cache reading result:\nAddress: 0x%x\nData: 0x%x\n\n", address, data );
+  return data;
 }
 
 void Cache::write(uint32_t address, uint32_t data) {
   AddressParts address_parts{ address };
   
-  CacheSet target_set = sets_.at(address_parts.index_);
+  CacheSet& target_set = sets_.at(address_parts.index_);
   CacheLine* target_line = target_set.find(address_parts.tag_);
 
   if (target_line) { // cache hit 

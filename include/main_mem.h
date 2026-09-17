@@ -22,6 +22,7 @@ class MainMemory {
     void read(uint32_t start_address, uint32_t size, uint8_t* destination);
     // reads from source and writes to memory at address start_address
     void write(uint32_t start_address, uint32_t size, uint8_t* source);
+    // print_memory prints the first 256 bytes of memory
     void print_memory();
 
   private: 
