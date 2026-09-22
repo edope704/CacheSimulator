@@ -1,3 +1,0 @@
-/home/penny/Documents/Github/CacheSimulator/build/CMakeFiles/demo.dir
-/home/penny/Documents/Github/CacheSimulator/build/CMakeFiles/edit_cache.dir
-/home/penny/Documents/Github/CacheSimulator/build/CMakeFiles/rebuild_cache.dir
