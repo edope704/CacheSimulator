@@ -8,7 +8,6 @@ add_executable( demo
   src/demo.cpp
   src/cache.cpp 
   src/main_mem.cpp 
-  src/memory_processor.cpp
   src/replacement.cpp
 )
 

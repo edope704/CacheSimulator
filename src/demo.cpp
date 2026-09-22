@@ -1,9 +1,9 @@
 #include "cache.h"
 #include "main_mem.h"
-#include "memory_processor.h"
+#include "memory_processor.hpp"
 
 int main() {
-  MemoryProcessor memory;
+  MemoryProcessor<SetAssociativeCache> memory;
   uint32_t demo_address{ 0x20 };
 
   memory.read( 0x28 );

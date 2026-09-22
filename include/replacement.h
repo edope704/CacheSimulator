@@ -5,11 +5,11 @@
 
 class ReplacementAlgorithm {
   public:
-    void SetWays(uint8_t num_of_ways);
+    void SetWays( uint8_t num_of_ways );
     uint8_t select_victim();
-  
+
   private:
     uint8_t num_of_ways_;
 };
 
-#endif // REPLACEMENT_H
+#endif  // REPLACEMENT_H
