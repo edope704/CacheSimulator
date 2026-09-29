@@ -1,4 +1,4 @@
-#include "../include/main_mem.h"
+#include "main_mem.hpp"
 
 #include <array>
 #include <cstring>

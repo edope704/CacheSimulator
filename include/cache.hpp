@@ -3,8 +3,8 @@
 
 #include <array>
 
-#include "main_mem.h"
-#include "replacement.h"
+#include "main_mem.hpp"
+#include "replacement.hpp"
 
 constexpr uint8_t MEMORY_ADDRESS_SIZE = 32;
 constexpr uint8_t CACHE_LINE_SIZE = 64;

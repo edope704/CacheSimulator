@@ -3,8 +3,8 @@
 
 #include <iostream>
 
-#include "cache.h"
-#include "main_mem.h"
+#include "cache.hpp"
+#include "main_mem.hpp"
 
 template <template <class> class CacheType, class ReplacementPolicy>
 class MemoryProcessor {

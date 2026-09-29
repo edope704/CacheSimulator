@@ -1,7 +1,7 @@
-#include "cache.h"
-#include "main_mem.h"
+#include "cache.hpp"
+#include "main_mem.hpp"
 #include "memory_processor.hpp"
-#include "replacement.h"
+#include "replacement.hpp"
 
 int main() {
   MemoryProcessor<SetAssociativeCache, RandomReplacement> memory;
