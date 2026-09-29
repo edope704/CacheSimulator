@@ -1,9 +1,10 @@
 #include "cache.h"
 #include "main_mem.h"
 #include "memory_processor.hpp"
+#include "replacement.h"
 
 int main() {
-  MemoryProcessor<SetAssociativeCache> memory;
+  MemoryProcessor<SetAssociativeCache, RandomReplacement> memory;
   uint32_t demo_address{ 0x20 };
 
   memory.read( 0x28 );

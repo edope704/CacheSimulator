@@ -1,19 +1,23 @@
-#include "cache.h"
-
 #include <array>
 #include <cstring>
+#include <iostream>
 
-#include "iostream"
+template <class ReplacementPolicy>
+CacheSet<ReplacementPolicy>::CacheSet() {
+  if constexpr ( requires { replacement_.SetWays( SET_ASSOCIATIVE_CACHE_N_SETS ); } ) {
+    replacement_.SetWays( SET_ASSOCIATIVE_CACHE_N_WAYS );
+  }
+}
 
-CacheSet::CacheSet() { replacement_.SetWays( SET_ASSOCIATIVE_CACHE_N_WAYS ); }
-
-CacheLine* CacheSet::find( uint32_t tag ) {
+template <class ReplacementPolicy>
+CacheLine* CacheSet<ReplacementPolicy>::find( uint32_t tag ) {
   for ( uint8_t way{ 0 }; way < SET_ASSOCIATIVE_CACHE_N_WAYS; way++ )
     if ( set_.at( way ).valid_ && set_.at( way ).tag_ == tag ) return &set_.at( way );
   return nullptr;
 }
 
-CacheLine* CacheSet::replace( uint32_t tag, uint8_t* new_data ) {
+template <class ReplacementPolicy>
+CacheLine* CacheSet<ReplacementPolicy>::replace( uint32_t tag, uint8_t* new_data ) {
   uint8_t victim_index = replacement_.select_victim();
 
   set_.at( victim_index ).valid_ = true;
@@ -24,12 +28,16 @@ CacheLine* CacheSet::replace( uint32_t tag, uint8_t* new_data ) {
   return &set_.at( victim_index );
 }
 
-void SetAssociativeCache::initialize( MainMemory* memory ) { main_mem_ = memory; }
+template <class ReplacementPolicy>
+void SetAssociativeCache<ReplacementPolicy>::initialize( MainMemory* memory ) {
+  main_mem_ = memory;
+}
 
-uint32_t SetAssociativeCache::read( uint32_t address ) {
+template <class ReplacementPolicy>
+uint32_t SetAssociativeCache<ReplacementPolicy>::read( uint32_t address ) {
   AddressParts address_parts{ address };
 
-  CacheSet& target_set = sets_.at( address_parts.index_ );
+  CacheSet<ReplacementPolicy>& target_set = sets_.at( address_parts.index_ );
   CacheLine* target_line = target_set.find( address_parts.tag_ );
 
   uint32_t data;
@@ -53,10 +61,11 @@ uint32_t SetAssociativeCache::read( uint32_t address ) {
   return data;
 }
 
-void SetAssociativeCache::write( uint32_t address, uint32_t data ) {
+template <class ReplacementPolicy>
+void SetAssociativeCache<ReplacementPolicy>::write( uint32_t address, uint32_t data ) {
   AddressParts address_parts{ address };
 
-  CacheSet& target_set = sets_.at( address_parts.index_ );
+  CacheSet<ReplacementPolicy>& target_set = sets_.at( address_parts.index_ );
   CacheLine* target_line = target_set.find( address_parts.tag_ );
 
   if ( target_line ) {  // cache hit

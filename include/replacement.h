@@ -5,6 +5,11 @@
 
 class ReplacementAlgorithm {
   public:
+    virtual uint8_t select_victim() = 0;
+};
+
+class RandomReplacement : public ReplacementAlgorithm {
+  public:
     void SetWays( uint8_t num_of_ways );
     uint8_t select_victim();
 

@@ -46,6 +46,7 @@ struct CacheLine {
     bool valid_;
 };
 
+template <class ReplacementPolicy>
 class CacheSet {
   public:
     CacheSet();
@@ -54,27 +55,31 @@ class CacheSet {
 
   private:
     std::array<CacheLine, SET_ASSOCIATIVE_CACHE_N_WAYS> set_;
-    ReplacementAlgorithm replacement_;
+    ReplacementPolicy replacement_;
 };
 
+template <class ReplacementPolicy>
 class Cache {
   public:
     virtual ~Cache() = default;
 
     virtual void initialize( MainMemory* memory ) = 0;
-    virtual uint32_t read( uint32_t address );
-    virtual void write( uint32_t address, uint32_t data );
+    virtual uint32_t read( uint32_t address ) = 0;
+    virtual void write( uint32_t address, uint32_t data ) = 0;
 };
 
-class SetAssociativeCache : public Cache {
+template <class ReplacementPolicy>
+class SetAssociativeCache : public Cache<ReplacementPolicy> {
   public:
     void initialize( MainMemory* memory );
     uint32_t read( uint32_t address );
     void write( uint32_t address, uint32_t data );
 
   private:
-    std::array<CacheSet, SET_ASSOCIATIVE_CACHE_N_SETS> sets_;
+    std::array<CacheSet<ReplacementPolicy>, SET_ASSOCIATIVE_CACHE_N_SETS> sets_;
     MainMemory* main_mem_;
 };
+
+#include "cache.tpp"
 
 #endif
