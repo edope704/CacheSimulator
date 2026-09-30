@@ -4,6 +4,7 @@
 #include <array>
 #include <cstring>
 #include <iostream>
+#include <type_traits>
 
 #include "main_mem.hpp"
 #include "replacement.hpp"
@@ -19,26 +20,35 @@ constexpr uint8_t SET_ASSOCIATIVE_CACHE_TAG_SIZE = 20;
 constexpr uint8_t SET_ASSOCIATIVE_CACHE_INDEX_SIZE = 6;
 constexpr uint8_t SET_ASSOCIATIVE_CACHE_OFFEST_SIZE = 6;  // 64 byte cache line
 
-// Currently not in use
-/*
- /constexpr uint8_t DIRECTLY_MAPPED_CACHE_TAG_SIZE = 14;
- /constexpr uint8_t DIRECTLY_MAPPED_CACHE_INDEX_SIZE = 12;  // 4096 lines
- /constexpr uint8_t DIRECTLY_MAPPED_CACHE_OFFEST_SIZE = 6;  // 64 byte cache line
- /
- /constexpr uint8_t FULLY_ASSOCIATIVE_CACHE_TAG_SIZE = 20;
- /constexpr uint8_t FULLY_ASSOCIATIVE_CACHE_OFFEST_SIZE = 12;  // 4096 byte
- */
+constexpr uint8_t DIRECTLY_MAPPED_CACHE_TAG_SIZE = 14;
+constexpr uint8_t DIRECTLY_MAPPED_CACHE_INDEX_SIZE = 12;  // 4096 lines
+constexpr uint8_t DIRECTLY_MAPPED_CACHE_OFFEST_SIZE = 6;  // 64 byte cache line
 
+constexpr uint8_t FULLY_ASSOCIATIVE_CACHE_TAG_SIZE = 20;
+constexpr uint8_t FULLY_ASSOCIATIVE_CACHE_OFFEST_SIZE = 12;  // 4096 byte
+
+// template <class CacheType>
+template <uint8_t TagSize, uint8_t IndexSize, uint8_t OffsetSize>
 struct AddressParts {
     AddressParts( uint32_t address ) {
-      offset_ = address & ( ( 1U << SET_ASSOCIATIVE_CACHE_OFFEST_SIZE ) - 1 );
-      index_ = ( address >> SET_ASSOCIATIVE_CACHE_OFFEST_SIZE ) &
-               ( ( 1U << SET_ASSOCIATIVE_CACHE_INDEX_SIZE ) - 1 );
-      tag_ = ( address >> ( MEMORY_ADDRESS_SIZE - SET_ASSOCIATIVE_CACHE_TAG_SIZE ) );
+      offset_ = address & ( ( 1U << OffsetSize ) - 1 );
+      index_ = ( address >> OffsetSize ) & ( ( 1U << IndexSize ) - 1 );
+      tag_ = ( address >> ( OffsetSize + IndexSize ) );
     }
 
     uint32_t tag_;
     uint8_t index_;
+    uint8_t offset_;
+};
+
+template <uint8_t TagSize, uint8_t OffsetSize>
+struct AddressParts<TagSize, 0, OffsetSize> {
+    AddressParts( uint32_t address ) {
+      offset_ = address & ( ( 1U << OffsetSize ) - 1 );
+      tag_ = ( address >> OffsetSize );
+    }
+
+    uint32_t tag_;
     uint8_t offset_;
 };
 
@@ -78,7 +88,36 @@ class SetAssociativeCache : public Cache<ReplacementPolicy> {
     void write( uint32_t address, uint32_t data );
 
   private:
+    using ParsedAddress =
+        AddressParts<SET_ASSOCIATIVE_CACHE_TAG_SIZE, SET_ASSOCIATIVE_CACHE_INDEX_SIZE,
+                     SET_ASSOCIATIVE_CACHE_OFFEST_SIZE>;
+
     std::array<CacheSet<ReplacementPolicy>, SET_ASSOCIATIVE_CACHE_N_SETS> sets_;
+    MainMemory* main_mem_;
+};
+
+template <class ReplacementPolicy>
+class FullyAssociativeCache : public Cache<ReplacementPolicy> {
+  public:
+    void initialize( MainMemory* memory );
+    uint32_t read( uint32_t address );
+    void write( uint32_t address, uint32_t data );
+
+  private:
+    MainMemory* main_mem_;
+};
+
+template <class ReplacementPolicy>
+class DirectlyMappedCache : public Cache<ReplacementPolicy> {
+  public:
+    void initialize( MainMemory* memory );
+    uint32_t read( uint32_t address );
+    void write( uint32_t address, uint32_t data );
+
+  private:
+    using ParsedAddress =
+        AddressParts<DIRECTLY_MAPPED_CACHE_TAG_SIZE, DIRECTLY_MAPPED_CACHE_INDEX_SIZE,
+                     DIRECTLY_MAPPED_CACHE_OFFEST_SIZE>;
     MainMemory* main_mem_;
 };
 
@@ -119,7 +158,7 @@ void SetAssociativeCache<ReplacementPolicy>::initialize( MainMemory* memory ) {
 
 template <class ReplacementPolicy>
 uint32_t SetAssociativeCache<ReplacementPolicy>::read( uint32_t address ) {
-  AddressParts address_parts{ address };
+  ParsedAddress address_parts{ address };
 
   CacheSet<ReplacementPolicy>& target_set = sets_.at( address_parts.index_ );
   CacheLine* target_line = target_set.find( address_parts.tag_ );
@@ -147,7 +186,7 @@ uint32_t SetAssociativeCache<ReplacementPolicy>::read( uint32_t address ) {
 
 template <class ReplacementPolicy>
 void SetAssociativeCache<ReplacementPolicy>::write( uint32_t address, uint32_t data ) {
-  AddressParts address_parts{ address };
+  ParsedAddress address_parts{ address };
 
   CacheSet<ReplacementPolicy>& target_set = sets_.at( address_parts.index_ );
   CacheLine* target_line = target_set.find( address_parts.tag_ );
