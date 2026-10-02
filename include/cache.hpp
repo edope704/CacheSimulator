@@ -104,6 +104,8 @@ class FullyAssociativeCache : public Cache<ReplacementPolicy> {
     void write( uint32_t address, uint32_t data );
 
   private:
+    using ParsedAddress =
+        AddressParts<FULLY_ASSOCIATIVE_CACHE_TAG_SIZE, 0, FULLY_ASSOCIATIVE_CACHE_OFFEST_SIZE>;
     MainMemory* main_mem_;
 };
 
