@@ -2,30 +2,14 @@
 #define CACHE_H
 
 #include <array>
+#include <cstdint>
 #include <cstring>
 #include <iostream>
 #include <type_traits>
 
+#include "common.hpp"
 #include "main_mem.hpp"
 #include "replacement.hpp"
-
-constexpr uint8_t MEMORY_ADDRESS_SIZE = 32;
-constexpr uint8_t CACHE_LINE_SIZE = 64;
-constexpr uint16_t CACHE_SIZE = 32 * 1024;  // 32kb
-
-constexpr uint8_t SET_ASSOCIATIVE_CACHE_N_SETS = 64;
-constexpr uint8_t SET_ASSOCIATIVE_CACHE_N_WAYS = 4;
-
-constexpr uint8_t SET_ASSOCIATIVE_CACHE_TAG_SIZE = 20;
-constexpr uint8_t SET_ASSOCIATIVE_CACHE_INDEX_SIZE = 6;
-constexpr uint8_t SET_ASSOCIATIVE_CACHE_OFFEST_SIZE = 6;  // 64 byte cache line
-
-constexpr uint8_t DIRECTLY_MAPPED_CACHE_TAG_SIZE = 14;
-constexpr uint8_t DIRECTLY_MAPPED_CACHE_INDEX_SIZE = 12;  // 4096 lines
-constexpr uint8_t DIRECTLY_MAPPED_CACHE_OFFEST_SIZE = 6;  // 64 byte cache line
-
-constexpr uint8_t FULLY_ASSOCIATIVE_CACHE_TAG_SIZE = 20;
-constexpr uint8_t FULLY_ASSOCIATIVE_CACHE_OFFEST_SIZE = 12;  // 4096 byte
 
 // template <class CacheType>
 template <uint8_t TagSize, uint8_t IndexSize, uint8_t OffsetSize>
