@@ -9,7 +9,9 @@
 
 #include <array>
 #include <cstdint>
+#include <cstring>
 #include <iomanip>
+#include <iostream>
 #include <memory>
 
 #include "common.hpp"
@@ -20,7 +22,6 @@ class MainMemory {
       memory_ = std::make_unique<std::array<uint8_t, MAIN_MEM_SIZE>>();
       memory_.get()->fill( 0x00 );
     }
-    ~MainMemory();
 
     // reads from memory at address start_address and writes to destination
     void read( uint32_t start_address, uint32_t size, uint8_t* destination ) {

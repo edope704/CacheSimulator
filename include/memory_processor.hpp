@@ -6,7 +6,7 @@
 #include "cache.hpp"
 #include "main_mem.hpp"
 
-template <template <class> class CacheType, class ReplacementPolicy>
+template <class CacheType>
 class MemoryProcessor {
   public:
     MemoryProcessor() { cache_.initialize( &main_memory_ ); }
@@ -25,7 +25,7 @@ class MemoryProcessor {
 
   private:
     MainMemory main_memory_;
-    CacheType<ReplacementPolicy> cache_;
+    CacheType cache_;
 };
 
 #endif  // MEMORY_PROCESSOR_H
