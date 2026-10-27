@@ -20,10 +20,3 @@ cmake --build build
 # Run the simulator
 ./build/cache_simulator
 ```
-
-## Features to be Implemented
-
-The following features are planned for future development to expand the simulator's capabilities:
-
-* **Cache Replacement Policies**: Implementation of other cache replacement algorithms in the `ReplacementAlgorithm` module.
-* **Configurable Associativity**: Allowing configuration for direct-mapped, fully-associative, and N-way set-associative.

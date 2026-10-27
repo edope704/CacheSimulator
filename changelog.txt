@@ -1,0 +1,35 @@
+Refactor source structure to header-only design
+- Moved all implementations from `src/cache.cpp`, `src/main_mem.cpp`, and `src/replacement.cpp` inline into their respective `.hpp` headers (`include/cache.hpp`, `include/main_mem.hpp`, `include/replacement.hpp`).
+- Deleted `src/cache.cpp`, `src/main_mem.cpp`, and `src/replacement.cpp` to keep the codebase cleaner and fully rely on C++ templates and inline functions.
+- Updated `CMakeLists.txt` to remove the deleted `.cpp` files from the executable target.
+
+Extract shared constants into common header
+- Created a new `include/common.hpp` file.
+- Centralized constants like `MAIN_MEM_SIZE`, `CACHE_SIZE`, and `CACHE_LINE_SIZE` into `common.hpp`.
+- Included `common.hpp` in `main_mem.hpp` and `replacement.hpp` to resolve dependencies.
+
+Implement Template Metaprogramming for Address Parsing and Cache Types
+- Refactored `AddressParts` in `cache.hpp` into a template struct `AddressParts<TagSize, IndexSize, OffsetSize>`.
+- Added a template partial specialization for `AddressParts<TagSize, 0, OffsetSize>` to safely support index-less caches (Fully Associative).
+- Created `FullyAssociativeCache` and `DirectlyMappedCache` classes that inherit from `Cache<ReplacementPolicy>`.
+- Updated cache classes to alias their specific `AddressParts` configurations as `ParsedAddress`.
+- Made `read` and `write` methods pure virtual (`= 0`) in the base `Cache` class to enforce proper interface implementation.
+
+Polymorphic Cache Base Class & MemoryProcessor Simplification
+- Refactored `Cache` to be a non-templated polymorphic base class, unifying `main_mem_` and `initialize()` across all cache types.
+- Removed template parameter from `DirectlyMappedCache` since direct-mapped caches do not require a replacement policy.
+- Completed full implementations for `read()`, `write()`, and `replace()` across all cache variants.
+- Updated `MemoryProcessor` to accept `template <class CacheType>` directly instead of template-template parameters, allowing it to seamlessly wrap both templated and non-templated caches.
+
+Implement LRU Replacement Algorithm with std::list::splice
+- Added `record_access(uint16_t index)` and `SetWays(uint16_t num_of_ways)` hooks to `ReplacementAlgorithm`.
+- Implemented `LeastRecentlyUsed` in `include/replacement.hpp` using `std::list` and `std::list::splice` for O(1) node relocation without reallocating nodes on each access.
+- Integrated access tracking into `SetAssociativeCache` and `FullyAssociativeCache` on cache hits (`find`) and block replacements (`replace`).
+
+Modularize Cache Architecture into Dedicated Headers
+- Extracted shared structures (`AddressParts`, `CacheLine`, `Cache`) into `include/cache_base.hpp`.
+- Separated cache models into dedicated headers: `include/set_associative_cache.hpp`, `include/fully_associative_cache.hpp`, and `include/directly_mapped_cache.hpp`.
+- Replaced monolithic `include/cache.hpp` with a 9-line umbrella header that includes all modular cache headers.
+- Removed dead/orphan `CacheSet` declaration.
+- Expanded `src/demo.cpp` with isolated test functions for Set-Associative, Fully-Associative, Directly-Mapped, and LRU eviction verification.
+

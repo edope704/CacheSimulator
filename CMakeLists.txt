@@ -6,8 +6,6 @@ SET( CMAKE_EXPORT_COMPILE_COMMANDS )
 
 add_executable( demo
   src/demo.cpp
-  src/main_mem.cpp 
-  src/replacement.cpp
 )
 
 target_include_directories( demo
