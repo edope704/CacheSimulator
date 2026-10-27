@@ -8,7 +8,7 @@ The simulator models a set-associative cache system backed by a simulated 4MB ma
 
 ## Building and Running
 
-Ensure you have CMake (minimum version 3.14) and a modern C++ compiler (C++17 supported) installed.
+Ensure you have CMake (minimum version 3.14) and a modern C++ compiler (C++20 supported) installed.
 
 ```bash
 # Configure the project
