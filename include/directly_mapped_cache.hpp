@@ -23,11 +23,32 @@ class DirectlyMappedCache : public Cache {
     CacheLine* replace( uint32_t tag, uint16_t index, uint8_t* new_data );
 
     std::array<CacheLine, N_CACHE_LINES> cache_;
+
+#ifdef hitrate_on_
+  public:
+    float get_total_hit_rate() {
+      auto hits = read_hits_ + write_hits_;
+      auto misses = read_misses_ + write_misses_;
+      if ( hits + misses == 0 ) return 0.0f;
+      return static_cast<float>( hits ) / static_cast<float>( hits + misses );
+    }
+    float get_read_hitrate() {
+      if ( read_hits_ + read_misses_ == 0 ) return 0.0f;
+      return static_cast<float>( read_hits_ ) / static_cast<float>( read_hits_ + read_misses_ );
+    }
+    float get_write_hitrate() {
+      if ( write_hits_ + write_misses_ == 0 ) return 0.0f;
+      return static_cast<float>( write_hits_ ) / static_cast<float>( write_hits_ + write_misses_ );
+    }
+
+  private:
+    size_t read_hits_{ 0 }, read_misses_{ 0 };
+    size_t write_hits_{ 0 }, write_misses_{ 0 };
+#endif
 };
 
 inline CacheLine* DirectlyMappedCache::find( uint32_t tag, uint16_t index ) {
-  if ( cache_.at( index ).valid_ && cache_.at( index ).tag_ == tag )
-    return &cache_.at( index );
+  if ( cache_.at( index ).valid_ && cache_.at( index ).tag_ == tag ) return &cache_.at( index );
   return nullptr;
 }
 
@@ -47,10 +68,21 @@ inline uint32_t DirectlyMappedCache::read( uint32_t address ) {
   uint32_t data;
 
   if ( target_line ) {  // Cache hit
+#ifdef log_on_
     std::printf( "Cache hit. Retrieving data from Cache...\n" );
+#endif
+#ifdef hitrate_on_
+    read_hits_++;
+#endif
     data = *reinterpret_cast<uint32_t*>( &target_line->data_.at( address_parts.offset_ ) );
   } else {  // Cache miss
+
+#ifdef log_on_
     std::printf( "Cache miss, retrieving data from main memory...\n" );
+#endif
+#ifdef hitrate_on_
+    read_misses_++;
+#endif
     uint32_t target_line_start = address & ~( CACHE_LINE_SIZE - 1 );
     std::array<uint8_t, CACHE_LINE_SIZE> temp_buffer;
     main_mem_->read( target_line_start, CACHE_LINE_SIZE, temp_buffer.data() );
@@ -58,7 +90,9 @@ inline uint32_t DirectlyMappedCache::read( uint32_t address ) {
     data = *reinterpret_cast<uint32_t*>( &new_line->data_.at( address_parts.offset_ ) );
   }
 
+#ifdef log_on_
   std::printf( "Cache reading result:\nAddress: 0x%x\nData: 0x%x\n\n", address, data );
+#endif
   return data;
 }
 
@@ -68,11 +102,17 @@ inline void DirectlyMappedCache::write( uint32_t address, uint32_t data ) {
   CacheLine* target_line = find( address_parts.tag_, address_parts.index_ );
 
   if ( target_line ) {  // Cache hit
+#ifdef hitrate_on_
+    write_hits_++;
+#endif
     *reinterpret_cast<uint32_t*>( &target_line->data_.at( address_parts.offset_ ) ) = data;
   }
-
+#ifdef hitrate_on_
+  else {
+    write_misses_++;
+  }
+#endif
   main_mem_->write( address, sizeof( uint32_t ), reinterpret_cast<uint8_t*>( &data ) );
 }
 
 #endif  // DIRECTLY_MAPPED_CACHE_HPP
-
